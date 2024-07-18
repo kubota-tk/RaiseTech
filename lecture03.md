@@ -5,15 +5,15 @@
 1. アプリケーションのREADMEに従った、各種バージョン設定の状況
 ![version](images03/1version.png)
 
-2. アプリケーションをデプロイした時の状況
+2. アプリケーションをデプロイ、実行した時の状況
 
-    APサーバ名「puma」、バージョン「６.４.２」
+    APサーバ名「Puma」、バージョン「６.４.２」
 ![app_start(puma_ver)](images03/2app_start(puma_ver).png)
 
-3. デプロイした時のブラウザ表示
+3. 表示されたブラウザ表示
 ![browser](images03/3browser.png)
 
-4. pumaを停止してデプロイした時のブラウザ表示
+4. Pumaを停止したまま、アプリケーションを実行した時のブラウザ表示
 
     引き続きアクセスは出来ませんでした。
 ![browser(puma_off)](images03/4browser(puma_off).png)
@@ -23,12 +23,12 @@
     DBサーバー名「MySQL Community Server」、バージョン「８.４.１」
 ![db_server(mysql_ver)](images03/5db_server(mysql_ver).png)
 
-6. MySQLを停止させてデプロイした状況
+6. MySQLを停止させたまま、アプリケーションを起動した状況
 
     アクセスはできなかった。
 ![app_start(db_off)](images03/6app_start(db_off).png)
 
-7. MySQLを停止させてデプロイした時のブラウザ表示
+7. MySQL停止状態でアプリケーションを起動した時のブラウザ表示
 ![browser(db_off)](images03/7browser(db_off).png)
 
 8. Railsの構成管理ツールの名前
