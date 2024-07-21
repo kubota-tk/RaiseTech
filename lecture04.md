@@ -20,7 +20,7 @@
 
 ![RDS-detail](images04/5.lec04-rds-detail.png)
 
-![RDS-security１](images04/6.lec04-rds-security.png)
+![RDS-security１](images04/6.lec04-rds-security1.png)
 
 ![RDS-security２](images04/7.lec04-rds-security2.png)
 
