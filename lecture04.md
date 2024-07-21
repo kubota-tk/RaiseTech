@@ -6,34 +6,34 @@
 
 1.  VPC作成（詳細とリソースを含む画像）
 
-![vpc-detail](images04/1.lec04-1-vpc1)
+![vpc-detail](images04/1.lec04-1-vpc1.png)
 
-![vpc-resouce](images04/2.lec04-2-vpc2)
+![vpc-resouce](images04/2.lec04-2-vpc2.png)
 
 2.  EC2作成（詳細とセキュリティグループを含む画像）
 
-![ec2-detail](images04/3.lec04-ec2-detail)
+![ec2-detail](images04/3.lec04-ec2-detail.png)
 
-![ec2-in/outbound](images04/4.lec04-ec2-in-out)
+![ec2-in/outbound](images04/4.lec04-ec2-in-out.png)
 
 3.  RDS作成（概要、セキュリティ、及びサブネットグループを含む画像）
 
-![RDS-detail](images04/5.lec04-rds-detail)
+![RDS-detail](images04/5.lec04-rds-detail.png)
 
-![RDS-security１](images04/6.lec04-rds-security)
+![RDS-security１](images04/6.lec04-rds-security.png)
 
-![RDS-security２](images04/7.lec04-rds-security2)
+![RDS-security２](images04/7.lec04-rds-security2.png)
 
-![RDS-security２](images04/8.lec04-subnet1)
+![RDS-security２](images04/8.lec04-subnet1.png)
 
-![RDS-security２](images04/9.lec04-subnet2)
+![RDS-security２](images04/9.lec04-subnet2.png)
 
-![RDS-security２](images04/10.lec04-rds-in)
+![RDS-security２](images04/10.lec04-rds-in.png)
 
 
 4.  EC2へSSH接続、さらにRDS（MySQLへ接続した状況)
 
-![vpc-resouce](images04/11.lec04-console)
+![vpc-resouce](images04/11.lec04-console.png)
 
 ## 今回の課題から学んだことと、感じたこと
 
