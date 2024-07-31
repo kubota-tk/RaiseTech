@@ -10,7 +10,7 @@ EC2上に、Railsを使ったサンプルアプリケーションをデプロイ
 
 EC2で「bin/dev」を実施した状況を、ターミナルとブラウザから確認した。
 
-![bin/dev-run](images05/1.bin:dev-run.png)![2.bin/dev-run-browser](images05/2.bin:dev-run-browser.png)
+![bin/dev-run](images05/1.bin:dev-run.png)![bin:dev-run-browser](images05/2.bin:dev-run-browser.png)
 
 
 2.  pumaのリッスン設定にUnixSocketを使用し、curlでの動作確認
@@ -18,7 +18,7 @@ EC2で「bin/dev」を実施した状況を、ターミナルとブラウザか�
 
 curlを使用したpumaの動作確認を実施した。
 
-![puma-run-unixsocket](images0５/3.puma-run-unixsocket.png)
+![puma-run-unixsocket](images05/3.puma-run-unixsocket.png)
 
 
 3.  nginxの単体起動確認
@@ -26,7 +26,7 @@ curlを使用したpumaの動作確認を実施した。
 
 nginxを単体で実施した状況を、ターミナルとブラウザから確認した。
 
-![nginx-run.png](images0５/4.nginx-run.png)![nginx-run-browser](images05/5.nginx-run-browser.png)
+![nginx-run](images05/4.nginx-run.png)![nginx-run-browser](images05/5.nginx-run-browser.png)
 
 
 4.  puma(組み込みサーバー)、nginxをUnixSocketを合わせた動作確認
@@ -34,7 +34,7 @@ nginxを単体で実施した状況を、ターミナルとブラウザから確
 
 pumaとnginxを組み合わせて動作させた状況をターミナルとブラウザから確認した。
 
-![puma.nginx-run](images0５/6.puma.nginx-run.png)![puma.nginx-run-browser](images05/7.puma.nginx-run-browser.png)
+![puma.nginx-run](images05/6.puma.nginx-run.png)![puma.nginx-run-browser](images05/7.puma.nginx-run-browser.png)
 
 
 5.  ALBの追加
@@ -44,17 +44,17 @@ pumaとnginxを組み合わせて動作させた状況をターミナルとブ�
 
 ALBの詳細について。
 
-![ALB](images0５/8.ALB.png)
+![ALB](images05/8.ALB.png)
 
 
 ALBを追加し、ブラウザ上で動作確認した。
 
-![ALB-browser](images0５/9.ALB-browser.png)
+![ALB-browser](images05/9.ALB-browser.png)
 
 
 ALBに設定したターゲットグループについて。
 
-![ALB-detail](images0５/10.ALB-detail.png)
+![ALB-detail](images05/10.ALB-detail.png)
 
 
 ６.  S3追加  
@@ -63,29 +63,29 @@ S3をアプリケーションの画像のstorageとして活用する。
 
 
 作成したS3のバケット概要について。
-![S3](images0５/11.S3.png)
 
+![S3](images05/11.S3.png)
 
-S3接続した後、画像を保存した状況をブラウザで確認。
+S3に接続した後、画像を保存した状況をブラウザで確認。
 
-![S3-browser-up](images0５/12.S3-browser-up.png)
+![S3-browser-up](images05/12.S3-browser-up.png)
 
 
 S3に画像が保存された状況を確認。
 
-![S3-storage](images0５/1３.S3-storage.png)
+![S3-storage](images05/13.S3-storage.png)
 
 
 S3に保存された画像を表示させた状況。
 
-![S3-storage-image](images0５/1４.S3-storage-image.png)
+![S3-storage-image](images05/14.S3-storage-image.png)
 
 
 6.  構成図
 
 本課題を構成図に表した。
 
-![drawing-lec5](images0５/15.drawing-lec5.png)
+![drawing-lec5](images05/15.drawing-lec5.png)
 
 
 ## 今回の課題から学んだことと、感じたこと
