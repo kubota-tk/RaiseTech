@@ -8,13 +8,15 @@
 * マネジメントコンソールから、現在の利用料を確認（先月分のEC2料金、無料枠について）
 
 
-1. CloudTailの記録
+
+1. CloudTrailの記録
 
 最終日の記録のうち、PutMetricAlarmの詳細を表示させた画像。
 ![cloudtrail-1](images06/1.cloudtrail-1.png)
 
 同記録のうち、イベントレコードを表示させた画像。記録の内容から、「実行したアカウントのユーザー名はAdministrator」、「実行日時は２０２４年８月２日午後4時28分43秒（JST）」、「イベント名がPutMetricAlarm（アラームのメトリクスの設定）」「アクセス元のIPアドレスが１０６.１５４.１４５.６２」等が判明した。
 ![cloudtrail-2](images06/2.cloudtrail-2.png)![cloudtrail-3](images06/3.cloudtrail-3.png)
+
 
 
 2.  CloudWatchのアラームの記録
@@ -38,9 +40,14 @@
 ![alert-mail-healthy](images06/7.alert-mail-healthy.png)
 
 
+
 3. AWS利用料の見積
-自分の利用状況を元に作成した見積を表示させた画像。（共有URL　　　　　　https://calculator.aws/#/estimate?id=8b1132818165e0a92388a6e0bb9e0916d2bb91d0）
+自分の利用状況を元に作成した見積を表示させた画像。
+[My Estimate(共有URL)](https://calculator.aws/#/estimate?id=8b1132818165e0a92388a6e0bb9e0916d2bb91d0)
+
+
 ![myestimate](images06/8.myestimate.png)
+
 
 
 4. 自分の現在の利用料
