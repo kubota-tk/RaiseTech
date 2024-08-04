@@ -43,7 +43,7 @@
 
 3. AWS利用料の見積
 自分の利用状況を元に作成した見積を表示させた画像。
-[My Estimate(共有URL)](https://calculator.aws/#/estimate?id=8b1132818165e0a92388a6e0bb9e0916d2bb91d0)
+[My Estimate(共有URL)](https://calculator.aws/#/estimate?id=ceb44a5395304d9327aef3e027cf0218d334b9c7)
 
 
 ![myestimate](images06/8.myestimate.png)
