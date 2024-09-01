@@ -65,9 +65,9 @@
 
 
 ## 9. テンプレート  
- - [**vpc.yaml**](/template10/vpc.yml)    
- - [**security.yaml**](/template10/security.yml)  
- - [**resources.yaml**](/template10/resources.yml)  
+ - [**vpc.yaml**](/template10/vpc.yaml)    
+ - [**security.yaml**](/template10/security.yaml)  
+ - [**resources.yaml**](/template10/resources.yaml)  
 
  
 ## 10. 今回の課題から学んだことと、感じたこと  
