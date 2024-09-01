@@ -65,12 +65,12 @@
 
 
 ## 9. テンプレート  
-![vpc.yaml](template10/vpc.yaml)  
-![security.yaml](template10/security.yaml)  
-![resources.yaml](template10/resources.yaml)  
+ - [**vpc.yaml**](/template10/vpc.yml)    
+ - [**security.yaml**](/template10/security.yml)  
+ - [**resources.yaml**](/template10/resources.yml)  
 
-
-## 今回の課題から学んだことと、感じたこと  
+ 
+## 10. 今回の課題から学んだことと、感じたこと  
 第10回講義では、CloudFormationにおいて、作成したテンプレートを使用した環境構築の自動化について学んだ。  
 
 VPCのテンプレート作成から行ったが、最初はCloudFormationの書式や関数などの理解に時間がかかった。書式について理解してから、課題5の環境を元にテンプレート作成を進めた。ウェブで学んだことはテンプレートにコメントとして残したが、タブとスペースを混在させてしまったこと等、うまく反映できず、エラー対応に時間がかかった。  
