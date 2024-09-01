@@ -1,0 +1,218 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: VPC and subnets for RaiseTech-Lecture10
+
+
+## Metadataの作成 ##
+Metadata:
+  AWS::CloudFormation::Interface:    #テンプレートアップ後の画面で表示されるパラメータ項目を表示順に表示
+    ParameterGroups:
+      - Label:    #パラメーターの名前
+          default: Environment Setting
+        Parameters:
+          - ProjectName
+      - Label:
+          default: Network Configuration
+        Parameters:
+          - VPCCIDR　#VPCのCDIR(デフォルト値は以下で指定)
+          - PublicSubnetACIDR   #Public Subnet AのCDIR(デフォルト値は以下で指定)
+          - PublicSubnetCCIDR	#Public Subnet CのCDIR(デフォルト値は以下で指定)
+          - PrivateSubnetACIDR	#Private Subnet AのCDIR(デフォルト値は以下で指定)
+          - PrivateSubnetCCIDR	#Private Subnet CのCDIR(デフォルト値は以下で指定)
+
+
+
+## Parametersの作成 ##
+
+Parameters:      #Metadataで設定したParametersのデフォルト値と入力型の設定
+  ProjectName:
+    Type: String	#String型＝自由入力
+    Description: Project Name
+    Default: RaiseTech-Lec10
+  VPCCIDR:
+    Type: String
+    Default: 10.1.0.0/16
+  PublicSubnetACIDR:
+    Type: String
+    Default: 10.1.10.0/24
+  PublicSubnetCCIDR:
+    Type: String
+    Default: 10.1.20.0/24
+  PrivateSubnetACIDR:
+    Type: String
+    Default: 10.1.100.0/24
+  PrivateSubnetCCIDR:
+    Type: String
+    Default: 10.1.200.0/24
+
+
+Resources:
+
+## VPCの作成 ##
+ 
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCIDR	#VPCのIPv4ネットワーク範囲、!RefでVPCCIDRを参照
+      EnableDnsSupport: true	#DNSサポートを有効
+      EnableDnsHostnames: true	#DNSホスト名を取得する
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-vpc	#!SubでProjectNameを参照する、単独での文字列結合に!Refは不可
+
+## InternetGatewayの作成 ##
+
+  InternetGateway: 
+    Type: AWS::EC2::InternetGateway	#インターネットゲートウェイの作成
+    Properties: 
+      Tags: 
+        - Key: Name
+          Value: !Sub ${ProjectName}-igw
+
+  InternetGatewayAttachment: 
+    Type: AWS::EC2::VPCGatewayAttachment	#インターネットゲートウェイをVPCに接続
+    Properties: 
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+## Subnetの作成 ##
+
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select          #select関数により、次行の数字でゾーンを選定
+        - 0                              #東京リージョンの場合、0=~1a、1=~1c、2=~1d
+        - Fn::GetAZs: ""                 #GetAZs関数により、指定したリージョンのリスト取得
+      CidrBlock: !Ref PublicSubnetACIDR		#PublicSubnetACIDRを参照
+      VpcId: !Ref VPC				#VPCを参照
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-PubSubA
+
+  PublicSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select
+        - 1
+        - Fn::GetAZs: ""
+      CidrBlock: !Ref PublicSubnetCCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-PubSubC
+
+  PrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select 
+        - 0
+        - Fn::GetAZs: ""
+      CidrBlock: !Ref PrivateSubnetACIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-PriSubA
+
+  PrivateSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select 
+        - 1
+        - Fn::GetAZs: ""
+      CidrBlock: !Ref PrivateSubnetCCIDR
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-PriSubC
+
+
+## RouteTableの作成 ##
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable	#Publicサブネット用のルートテーブル
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-PublicRouteTable
+
+  PrivateRouteTable1:
+    Type: AWS::EC2::RouteTable  #Privateサブネット用のルートテーブル1
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-PrivateRouteTable1
+
+  PrivateRouteTable2:
+    Type: AWS::EC2::RouteTable  #Privateサブネット用のルートテーブル2
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-PrivateRouteTable2
+
+  PublicRoute:
+    Type: AWS::EC2::Route	#インターネットへ抜けられるようにするためのルート
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+
+## Associate Routetable with Subnet　##
+
+  PublicSubnetRouteATableAssociation:           #ルートテーブルへサブネットを関連つける
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
+
+  PublicSubnetRouteCTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetC
+      RouteTableId: !Ref PublicRouteTable
+
+  PrivateSubnetRouteATableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      RouteTableId: !Ref PrivateRouteTable1
+
+  PrivateSubnetRouteCTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetC
+      RouteTableId: !Ref PrivateRouteTable2
+
+## Outputsの作成 ##
+Outputs: #他のテンプレートからGetAttを使って受け取れる値を設定
+  vpcId: #渡す値を出力する
+    Value: !Ref VPC     #VPCの値を参照
+    Export: 
+      Name: VPCID       #スタック間での値の共有を可能にする名前で、これを使用し、他のスタックから参照	
+
+  PublicSubnetAId:
+    Value: !Ref PublicSubnetA
+    Export: 
+      Name: Pub-SubA-ID
+
+  PublicSubnetCId:
+    Value: !Ref PublicSubnetC
+    Export: 
+      Name: Pub-SubC-ID
+
+  PrivateSubnetAId:
+    Value: !Ref PrivateSubnetA
+    Export: 
+      Name: Pri-SubA-ID
+
+  PrivateSubnetCId:
+    Value: !Ref PrivateSubnetC
+    Export: 
+      Name: Pri-SubC-ID
+
+
+
+

@@ -1,0 +1,297 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: EC2,RDS,ALB and S3 for RaiseTech-Lecture10
+
+## Metadataの作成 ##
+
+Metadata:  #テンプレートアップ後の画面で表示されるパラメータ項目を表示順に表示
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:  #パラメーターの名前
+          default: Environment Setting
+        Parameters:
+          - ProjectName
+      - Label:
+          default: Amazon EC2 Config
+        Parameters:  #EC2とSSH接続する際に必要なキーペア
+          - KeyName
+      - Label:
+          default: RDS Config
+        Parameters:  #DB作成に必要なパラメーター
+          - DBEngineName
+          - MySQLMajorVersion
+          - MySQLMinorVersion
+          - DBInstanceClass
+          - DBInstanceStorageSize
+          - DBInstanceStorageType
+          - DBName
+          - DBMasterUserName
+          - DBPassword
+
+##　Parametersの作成　##
+
+Parameters:  #Metadataで設定したParametersのデフォルト値と入力型の設定
+  ProjectName:
+    Type: String  #String型=自由入力
+    Description: project name
+    Default: RaiseTech-Lec10
+##---EC2---##
+  KeyName:  #EC2 Config
+    Description: The EC2 Key Pair to allow SSH access to the instance
+    Type: AWS::EC2::KeyPair::KeyName  #事前にAWSマネジメントコンソールで作成済みのものを指定
+##---RDS---##
+  DBEngineName: #DBの名称
+    Description: Input DB Engine Name
+    Type: String
+    Default: mysql   #デフォルトでmysql    
+  MySQLMajorVersion:   #MySQLのメジャーバージョン
+    Description: Input DB Major Version
+    Type: String
+    Default: 8.0   #デフォルトで8.0
+  MySQLMinorVersion:   #MySQLのマイナーバージョン
+    Description: Input DB Minor Version
+    Type: String	
+    Default: 36	   #デフォルトで36 
+  DBInstanceClass:    #DBインスタンスクラス
+    Type: String
+    Default: "db.t3.micro"   #デフォルトでdb.t3.micro
+  DBInstanceStorageSize:   #DBストレージサイズ
+    Type: String
+    Default: "20"   #デフォルトで20
+  DBInstanceStorageType:   #DBストレージタイプ
+    Type: String
+    Default: "gp2"   #デフォルトでgp2
+  DBName:   #DBの名前
+    Description: DB Name
+    Type: String
+    Default: RaiseTechLec10db #DBNameは文字で始まり、英数字のみ
+  DBMasterUserName:
+    Description: RDS Maseter User Name
+    Type: String
+    Default: admin   #デフォルトでのDB管理ユーザー名はadmin
+  DBPassword:   #DB管理ユーザーのパスワード
+    Description: RDS Password 
+    Type: String
+    NoEcho: true   #パスワードの値を出力やログに表示しない
+    MinLength: 8   #条件として8文字以上
+   
+Resources:
+
+## EC2 Instanceの作成 ##   
+
+ EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-031ff5a575101728a   #AMIのID、リージョンごとに変わる（Amazon Linux2を指定）
+      KeyName: !Ref KeyName   #パラメーターで指定したキーを参照
+      InstanceType: t2.micro   #インスタンスタイプ指定
+      NetworkInterfaces:   #ENIの設定
+        - AssociatePublicIpAddress: "true"  #自動割り当てパブリックIPの設定
+          DeviceIndex: "0"      #設定を行うENIの番号最初にアタッチしたものから0,1,2（自動割り当ての時は0）
+          SubnetId: !ImportValue Pub-SubA-ID   #他のテンプレートで設定したサブネットを参照（security.yaml）
+          GroupSet: 
+            - !ImportValue EC2-SG-ID   #他テンプレートで設定したセキュリティグループを参照（security.yaml）
+      BlockDeviceMappings:    #ストレージの設定
+        - DeviceName: /dev/xvda  #デバイス名
+          Ebs:   #EBSの設定
+            VolumeSize: 8
+            VolumeType: gp2
+            DeleteOnTermination: true   #EC2インスタンスの削除時、ボリュームも自動削除 
+      IamInstanceProfile: !Ref S3AccessInstanceProfile  #S3に関するIAMロールを付与
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-ec2
+## ユーザーデータ ##
+      UserData: !Base64 |  #base64関数、入力文字列をEC2インスタンスに渡す
+        #!/bin/bash	
+        yum install git -y   #ユーザーデータではroot実行、root所有になる
+        yum install mysql -y
+
+
+## RDS Instanceの作成 ##
+
+ DBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties: 
+      DBInstanceIdentifier: !Sub ${ProjectName}-rds 
+      Engine: !Ref DBEngineName   #DBエンジン名はパラメーターで入力したものを参照
+      EngineVersion: !Sub ${MySQLMajorVersion}.${MySQLMinorVersion}
+      DBInstanceClass: !Ref DBInstanceClass   #インスタンスクラスはパラメーターで入力したものを参照
+      AvailabilityZone: !Select   #Select関数により次行の数字でゾーンを指定
+      - 0   #東京リージョンの場合、0=~1a、1=~1c、2=~1d
+      - Fn::GetAZs: !Ref AWS::Region   #GetAZs関数により、指定したリージョンのリスト取得
+      AllocatedStorage: !Ref DBInstanceStorageSize    #ストレージはパラメーターで入力したものを参照
+      StorageType: !Ref DBInstanceStorageType    #DBストレージはパラメーターで入力したものを参照
+      DBName: !Ref DBName    #DB名はパラメーターで入力したものを参照
+      MasterUsername: !Ref DBMasterUserName    #管理ユーザー名はパラメーターで入力したものを参照
+      MasterUserPassword: !Ref DBPassword    #パスワードはパラメーターで入力したものを参照
+      DBSubnetGroupName: !Ref DBSubnetGroup    #サブネットグループはDBSubnetGroupを参照
+      PubliclyAccessible: false     #プライベートIPアドレスに解決するDNS名インスタンスを作成
+      MultiAZ: false    #マルチAZ配置であるかの確認
+      AutoMinorVersionUpgrade: false    #バージョンの自動アップグレードの適用確認
+      DBParameterGroupName: !Ref DBParameterGroup       #DBParameterGroupを参照
+      VPCSecurityGroups:
+        - !ImportValue RDS-SG-ID       #他のテンプレートのセキュリティグループを参照（security.yaml）
+      BackupRetentionPeriod: 7    #自動バックアップが保持される日数、０＝無効、整数＝有効
+      Tags: 
+        - Key: Name
+          Value: !Sub ${ProjectName}-rds 
+
+## DB ParameterGroupを作成 ##
+
+ DBParameterGroup:   #DBパラメーターをRDSグループ単位で管理
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      DBParameterGroupName: !Sub ${ProjectName}-db-parametergp
+      Description: MySQL Parameter Group
+      Family: !Sub MySQL${MySQLMajorVersion}	#DBパラメータグループのファミリー名
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-db-parametergp
+
+## DB SubnetGroupの作成 ##
+
+ DBSubnetGroup:   #RDSに対するサブネットグループの設定
+    Type: AWS::RDS::DBSubnetGroup
+    Properties: 
+      DBSubnetGroupName: !Sub ${ProjectName}-db-subnetgp
+      DBSubnetGroupDescription: DBSubnetGroup
+      SubnetIds: 
+        - !ImportValue Pri-SubA-ID    #他のテンプレートのサブネットを参照（vpc.yaml）
+        - !ImportValue Pri-SubC-ID    ###複数リージョン設定必須
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-db-subnetgp
+
+
+## ALBの作成 ##
+
+ ALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub ${ProjectName}-alb
+      Scheme: internet-facing    #インターネット経由はinternet-facing、内部はinternal
+      Type: application	     #application、network、gatewayいずれか
+      IpAddressType: ipv4
+      SecurityGroups: 
+        - !ImportValue ALB-SG-ID  #他のテンプレートで設定したセキュリティグループを参照（security.yaml）
+      Subnets: 
+        - !ImportValue Pub-SubA-ID   #他のテンプレートで設定したサブネットを参照、最低2つ（vpc.yaml）
+        - !ImportValue Pub-SubC-ID
+      Tags: 
+        - Key: Name
+          Value: !Sub ${ProjectName}-alb
+
+## TargetGroup ALB ##
+
+ TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup    #ターゲットへのルーティング設定
+    Properties:
+      Name: !Sub ${ProjectName}-alb-tg
+      VpcId: !ImportValue VPCID
+      IpAddressType: ipv4
+      Protocol: HTTP
+      ProtocolVersion: HTTP1    #デフォルトではHTTP/1.1を使用する（HTTP1）
+      Port: 80
+      TargetType: instance      #ターゲットの種類
+      Targets: 
+      - Id: !Ref EC2Instance
+      HealthCheckEnabled: true     #ヘルスチェックの可否
+      HealthCheckIntervalSeconds: 30  #チェック30秒間隔
+      HealthCheckPath: /           #ヘルスチェックのパス
+      HealthCheckPort: traffic-port   #ポート
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5    #タイムアウト5秒
+      HealthyThresholdCount: 5        #5回連続成功でOK
+      UnhealthyThresholdCount: 2      #2回連続失敗でNG
+      Matcher:                        #成功コード
+        HttpCode: 200
+      Tags:
+      - Key: Name
+        Value: !Sub ${ProjectName}-alb-tg
+
+## Listener(ALB) ##
+
+ Listener:   #外部からのアクセス設定
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ALB
+      Port: 80
+      Protocol: HTTP
+      DefaultActions: 
+      - Type: forward  #リクエストを１つ以上のターゲットグループにルーティング
+        TargetGroupArn: !Ref TargetGroup
+
+## S3 ##
+
+ S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: raisetech-lec10-s3-bucket 
+##BucketName: !Sub ${ProjectName}-s3-bucket
+      PublicAccessBlockConfiguration: #パブリックアクセスの許可設定（trueで全てブロック）
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+      BucketEncryption:                         #バケットの暗号化
+        ServerSideEncryptionConfiguration:      #デフォルトのサーバー側暗号化設定
+          - ServerSideEncryptionByDefault: 
+              SSEAlgorithm: AES256              #aws:kms,AES256,AWS:kms:dsse
+
+## IAM Policy ##
+
+ S3AccessPolicy:
+    Type: AWS::IAM::ManagedPolicy  #AWSマネージドポリシーの設定
+    Properties:
+      ManagedPolicyName: !Sub ${ProjectName}-s3acsecc-policy
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: 
+              - s3:GetObject
+              - s3:PutObject
+              - s3:ListBucket
+              - s3:DeleteObject
+            Resource: 
+              - !Sub arn:aws:s3:::${S3Bucket}
+              - !Sub arn:aws:s3:::${S3Bucket}/*
+
+## IAM Role ##
+
+ S3AccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectName}-ec2-role
+      Path: /
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement:
+          Effect: "Allow"
+          Principal:  #Roleを引き受ける者、serviceにかかる（ec2.amazonaws.com）
+            Service: 
+              - "ec2.amazonaws.com"  
+          Action: 
+            - "sts:AssumeRole"
+      ManagedPolicyArns:   #AWSマネージドポリシーのアマゾンリソースネーム
+        - !Ref S3AccessPolicy
+
+## IAM InstanceProflie ##
+ S3AccessInstanceProfile:
+    Type: AWS::IAM::InstanceProfile     #EC2とRolesのアタッチで使用
+    Properties:
+      InstanceProfileName: !Sub ${ProjectName}-instanceprofile
+      Path: "/"
+      Roles:
+      - !Ref S3AccessRole
+
+## Outputs ##
+Outputs:
+ ALBDNSName:
+    Description: DNS-Name of ALB
+    Value:  !GetAtt ALB.DNSName        #戻り値にDNSNameを指定
+
+ RDSEndpoint:
+    Description: Endpoint of RDS-Instance
+    Value:  !GetAtt DBInstance.Endpoint.Address	#戻り値に接続エンドポイントを指定
