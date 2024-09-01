@@ -8,15 +8,15 @@
 
 
 
-1. VPCの状況  
+## 1. VPCの状況  
+&emsp;作成したVPCの設定画像  
 
-作成したVPCの設定画像  
 ![1.vpc](images10/1.vpc.png)
 
 
-2. EC2の状況  
+## 2. EC2の状況  
+&emsp;作成したEC2の設定画面  
 
-作成したEC2の設定画面  
 ![2.ec2](images10/2.ec2.png)  
 
 ![3.ec2-detail](images10/3.ec2-detail.png)  
@@ -24,9 +24,9 @@
 ![4.ec2-security](images10/4.ec2-security.png)  
 
 
-3. RDSの状況  
- 
-作成したRDSの設定画面  
+## 3. RDSの状況   
+&emsp;作成したRDSの設定画面  
+
 ![5.rds](images10/5.rds.png)  
 
 ![6.rds-inbound](images10/6.rds-inbound.png)  
@@ -34,45 +34,40 @@
 ![7.rds-outbound](images10/7.rds-outbound.png) 
 
 
-4. ALBの状況  
-
-作成したALBの設定画面  
+## 4. ALBの状況  
+&emsp;作成したALBの設定画面  
 
 ![8.alb](images10/8.alb.png)  
 
 
-5. S3の状況  
-  
-作成したS3の設定画面  
+## 5. S3の状況    
+&emsp;作成したS3の設定画面  
 
 ![9.s3](images10/9.s3.png)  
 
 
-6. インターネットゲートウェイの状況  
-
-インターネットゲートウェイの設定画面  
+## 6. インターネットゲートウェイの状況  
+&emsp;インターネットゲートウェイの設定画面  
 
 ![10.igw](images10/10.igw.png)  
 
 
-7. ターゲットグループの状況  
-
-ターゲットグループの設定画面    
+## 7. ターゲットグループの状況  
+&emsp;ターゲットグループの設定画面    
 
 ![11.target](images10/11.target.png)  
 
 
-8. EC2への接続確認  
-
-SSHでEC2に接続した状況の画面  
+## 8. EC2への接続確認  
+&emsp;SSHでEC2に接続した状況の画面  
 
 ![12.connection](images10/12.connection.png)  
 
 
-9. テンプレート  
-![vpc.yaml](vpc.yaml)  
-![security.yaml](security.yaml)  
-![resources.yaml](resources.yaml)  
+## 9. テンプレート  
+![vpc.yaml](template10/vpc.yaml)  
+![security.yaml](template10/security.yaml)  
+![resources.yaml](template10/resources.yaml)  
 
 
 ## 今回の課題から学んだことと、感じたこと  
