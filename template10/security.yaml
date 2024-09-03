@@ -1,0 +1,99 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Description: SecurityGroups for RaiseTech-Lecture10
+
+## Parametersの作成 ##
+
+Parameters:             #画面に表示されるパラメータ項目の設定
+  ProjectName:
+    Type: String        #String型＝自由入力
+    Description: Project Name		#ProjectNameに対するコメント
+    Default: RaiseTech-Lec10
+  
+  MyIP:                                                 #MyIPとして、通信を許可するIPアドレスを指定
+    Description: IP address allowed to access EC2(SSH)	#MyIPに表示するコメント
+    Type: String					#String型＝自由入力
+
+Resources: 
+
+## EC2のSecurityGroupを作成　##
+
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup	#EC2インスタンスのセキュリティグループ
+    Properties:
+      GroupName: !Sub ${ProjectName}-ec2-sg	#セキュリティグループ名を!Subを使って参照して指定
+      GroupDescription:  Allow connections from SSH and ALB	#セキュリティグループに対するコメント
+      VpcId:  !ImportValue VPCID	#ImportValue関数で、別スタックで出力された値を参照する（vpc.yaml）
+      SecurityGroupIngress:             #EC2インスタンスのセキュリティグループ（インバウンド）
+        - IpProtocol: tcp		#22番ポートでのMY IPアドレスによる受信を許可する(SSH)
+          Fromport: 22
+          Toport: 22
+          CidrIp: !Ref MyIP
+        - IpProtocol: tcp		#80番ポートでのALBからの受信を許可する(HTTP)
+          Fromport: 80
+          Toport: 80
+          SourceSecurityGroupId: !Ref ALBSecurityGroup	#ALBSecurityGroupを通信元として指定
+      SecurityGroupEgress:      #EC2インスタンスのセキュリティグループ（アウトバウンド）
+        - IpProtocol: -1	#全てのプロトコルを許可
+          CidrIp: 0.0.0.0/0    	#全てのIPを許可
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-ec2-sg
+
+## RDS SecurityGroupを作成 ##
+
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${ProjectName}-rds-sg
+      GroupDescription: Allow connection from EC2
+      VpcId: !ImportValue VPCID
+      SecurityGroupIngress:
+        IpProtocol: tcp
+        Fromport: 3306
+        Toport: 3306
+        SourceSecurityGroupID: !Ref EC2SecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-rds-sg
+
+## ELB SecurityGroupを作成 ##
+
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${ProjectName}-alb-sg
+      GroupDescription: Allow connection from Port80 
+      VpcId: !ImportValue VPCID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          Fromport: 80
+          Toport: 80
+          CidrIp: !Ref MyIP
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-alb-sg
+          
+## Outputsを作成 ##
+
+Outputs:
+  EC2SecurityGroupId:
+    Description: EC2SecurityGroup ID
+    Value: !Ref EC2SecurityGroup
+    Export: 
+      Name: EC2-SG-ID
+  
+  RDSSecurityGroupId:
+    Description: RDSSecurityGroup ID
+    Value: !Ref RDSSecurityGroup
+    Export: 
+      Name: RDS-SG-ID
+  
+  ALBSecurityGroupId:
+    Description: ALBSecurityGroup ID
+    Value: !Ref ALBSecurityGroup
+    Export: 
+      Name: ALB-SG-ID  
