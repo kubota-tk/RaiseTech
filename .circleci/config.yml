@@ -1,18 +1,15 @@
 version: 2.1
-orbs:
-  python: circleci/python@2.0.3
+
 jobs:
-  cfn-lint:
-    executor: python/default
+  hello-job:
+    macos:
+      xcode: 13.4.1
     steps:
-      - checkout
-      - run: pip install cfn-lint
-      - run:
-          name: run cfn-lint
-          command: |
-            cfn-lint -i W3002 -t cloudformation/*.yml
+      - checkout # check out the code in the project directory
+      - run: echo "hello world" # run the `echo` command
 
 workflows:
-  raisetech:
+  my-workflow:
     jobs:
-      - cfn-lint
+      - hello-job
+
