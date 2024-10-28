@@ -48,7 +48,7 @@ template(Ansibleの設定ファイル)
  - [**inventory.yml**](/template13/ansible/inventory.yml)  
  - [**playbook.yml**](/template13/ansible/playbook.yml)  
  - [**main.yml(yum)**](/template13/ansible/yum/tasks/main.yml)  
- - [**main.yml(git)**](/template13/asible/git/tasks/main.yml)  
+ - [**main.yml(git)**](/template13/ansible/git/tasks/main.yml)  
  - [**main.yml(mysql)**](/template13/ansible/mysql/tasks/main.yml)  
  - [**main.yml(nginx)**](/template13/ansible/nginx/tasks/main.yml)  
 
@@ -65,7 +65,7 @@ template(Ansibleの設定ファイル)
 
 template
  - [**Gemfile**](/template13/serverspec/Gemfile)  
- - [**sample_spec.rb**](/template13/serverspec/54.64.64.240/sample_spec.rb)
+ - [**sample_spec.rb**](/template13/serverspec/spec/54.64.64.240/sample_spec.rb)
 
 
 
