@@ -1,0 +1,61 @@
+version: 2.1
+
+orbs:
+  aws-cli: circleci/aws-cli@5.1.0
+  ansible-playbook: orbss/ansible-playbook@0.0.5
+  ruby: circleci/ruby@2.2.1
+
+jobs:
+  execute-cloudformation:
+    executor: aws-cli/default
+    steps:
+      - checkout
+      - aws-cli/setup:
+          aws_access_key_id: AWS_ACCESS_KEY_ID
+          aws_secret_access_key: AWS_SECRET_ACCESS_KEY
+          region: AWS_DEFAULT_REGION
+      - run: 
+          name: Deploy to was from template
+          command: |
+            set -x
+            aws cloudformation deploy --template cloudformation/vpc.yml --stack-name CircleCI-lec13-vpc
+            aws cloudformation deploy --template cloudformation/security.yml --stack-name CircleCI-lec13-security
+            aws cloudformation deploy --template cloudformation/resources.yml --stack-name CircleCI-lec13-resources --capabilities CAPABILITY_NAMED_IAM
+  execute-ansible:
+    executor: ansible-playbook/default
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+              - SHA256:4APf4NJL13bChPbwTm2HMczPqyR0phoKeCNUb1lEqDs
+      - ansible-playbook/install:
+          version: 2.10.7
+      - ansible-playbook/playbook:
+          playbook: ansible/playbook.yml
+          playbook-options: -u ec2-user -i ansible/inventory --private-key ~/.ssh/id_rsa
+  execute-serverspec:
+    executor: ruby/default
+    steps:
+      - checkout
+      - ruby/install:
+          version: 3.2.3
+      - ruby/install-deps:
+          app-dir: serverspec
+      - run:
+          name: execute
+          command: |
+            cd serverspec
+            TARGET_HOST=54.64.64.240 bundle exec rspec
+
+workflows:
+  circleci-raisetech13-workflow:
+    jobs:
+      - execute-cloudformation
+      - execute-ansible:
+          requires:
+            - execute-cloudformation
+      - execute-serverspec: 
+          requires:
+            - execute-ansible
+
+
